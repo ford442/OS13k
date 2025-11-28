@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>OS13k Controller</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #222;
+            color: #fff;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            overflow: hidden;
+            touch-action: none;
+        }
+
+        #controls {
+            padding: 10px;
+            background-color: #333;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        input {
+            padding: 8px;
+            border-radius: 4px;
+            border: none;
+            flex-grow: 1;
+        }
+
+        button {
+            padding: 8px 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        button:disabled {
+            background-color: #555;
+        }
+
+        #trackpad {
+            flex-grow: 1;
+            background-color: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #555;
+            user-select: none;
+        }
+
+        #status {
+            font-size: 12px;
+            margin-top: 5px;
+            color: #aaa;
+        }
+    </style>
+</head>
+<body>
+    <div id="controls">
+        <input type="text" id="peerIdInput" placeholder="Enter OS13k ID">
+        <button id="connectBtn">Connect</button>
+    </div>
+    <div style="padding: 0 10px;">
+        <div id="status">Status: Disconnected</div>
+    </div>
+    <div id="trackpad">
+        TOUCH AREA
+    </div>
+
+    <!-- Load PeerJS from node_modules via relative path, assuming server root is project root -->
+    <script src="../node_modules/peerjs/dist/peerjs.min.js"></script>
+    <script src="controller.js"></script>
+</body>
+</html>
