@@ -1,15 +1,23 @@
 {
-  "name": "app",
+  "name": "os13k",
   "version": "1.0.0",
+  "description": "OS13k - A tiny operating system that fits in a 13 kb zip file",
   "main": "index.js",
   "repository": "https://github.com/ford442/OS13k",
-  "author": "google-labs-jules[bot] <161369871+google-labs-jules[bot]@users.noreply.github.com>",
+  "author": "Frank Force",
   "license": "MIT",
   "dependencies": {
     "http-server": "^14.1.1",
     "peerjs": "^1.5.5"
   },
+  "devDependencies": {
+    "google-closure-compiler": "^20231112.0.0",
+    "terser": "^5.24.0",
+    "roadroller": "^2.1.0"
+  },
   "scripts": {
-    "start": "http-server . -c-1"
+    "start": "http-server . -c-1",
+    "build:js13k": "node scripts/build-js13k.js",
+    "build": "npm run build:js13k"
   }
 }
