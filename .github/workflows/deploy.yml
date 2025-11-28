@@ -2,28 +2,24 @@ name: Build and Deploy OS13k Apps
 
 on:
   push:
-    branches:
-      - main
-      - master
+    branches: ["main", "master"]
   pull_request:
-    branches:
-      - main
-      - master
+    branches: ["main", "master"]
   workflow_dispatch:
 
-# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
 permissions:
   contents: read
   pages: write
   id-token: write
 
-# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
-# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
 concurrency:
   group: "pages"
   cancel-in-progress: false
 
 jobs:
+  # ----------------------------------------------------------------
+  # JOB 1: BUILD (Creates the 'dist' folder)
+  # ----------------------------------------------------------------
   build:
     runs-on: ubuntu-latest
     steps:
@@ -44,9 +40,9 @@ jobs:
           mkdir -p dist/os13k-full
           mkdir -p dist/js13k
 
+      # Copy your project files to dist/
       - name: Copy OS13k Full Version
         run: |
-          # Copy the full OS13k app (main version)
           cp -r index.html dist/os13k-full/
           cp -r favicon.ico dist/os13k-full/
           cp -r help.html dist/os13k-full/
@@ -59,23 +55,21 @@ jobs:
           cp -r music dist/os13k-full/
           cp -r shaders dist/os13k-full/
           cp -r system dist/os13k-full/
-          # Copy peerjs dependency if needed
           mkdir -p dist/os13k-full/node_modules/peerjs/dist
           cp -r node_modules/peerjs/dist/peerjs.min.js dist/os13k-full/node_modules/peerjs/dist/
 
       - name: Copy JS13k Build Version
         run: |
-          # Copy the JS13k minified version
           cp -r JS13k/index.html dist/js13k/
           cp -r JS13k/index.min.html dist/js13k/
           cp -r JS13k/index.js dist/js13k/
           cp favicon.ico dist/js13k/
-          # Copy the zip file if it exists
           if [ -f JS13k/OS13k.zip ]; then
             cp JS13k/OS13k.zip dist/js13k/
           fi
 
-      - name: Create root index page with links
+      # Create the landing page
+      - name: Create root index page
         run: |
           cat > dist/index.html << 'EOF'
           <!DOCTYPE html>
@@ -84,109 +78,34 @@ jobs:
               <meta charset="UTF-8">
               <meta name="viewport" content="width=device-width, initial-scale=1.0">
               <title>OS13k - Choose Version</title>
-              <link rel="icon" type="image/x-icon" href="os13k-full/favicon.ico">
-              <style>
-                  body {
-                      font-family: Arial, sans-serif;
-                      background: linear-gradient(135deg, #222233, #332222);
-                      color: #fff;
-                      min-height: 100vh;
-                      margin: 0;
-                      display: flex;
-                      flex-direction: column;
-                      align-items: center;
-                      justify-content: center;
-                      text-align: center;
-                  }
-                  h1 {
-                      font-size: 3em;
-                      margin-bottom: 10px;
-                      text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-                  }
-                  .emoji {
-                      font-size: 4em;
-                      margin: 20px 0;
-                  }
-                  .description {
-                      font-size: 1.2em;
-                      margin-bottom: 40px;
-                      max-width: 600px;
-                      line-height: 1.6;
-                  }
-                  .links {
-                      display: flex;
-                      gap: 30px;
-                      flex-wrap: wrap;
-                      justify-content: center;
-                  }
-                  .link-card {
-                      background: linear-gradient(180deg, #fff 0%, #888 100%);
-                      border-radius: 15px;
-                      padding: 30px;
-                      width: 250px;
-                      color: #000;
-                      text-decoration: none;
-                      box-shadow: 5px 5px 15px rgba(0,0,0,0.4);
-                      transition: transform 0.2s, box-shadow 0.2s;
-                  }
-                  .link-card:hover {
-                      transform: translateY(-5px);
-                      box-shadow: 8px 8px 20px rgba(0,0,0,0.5);
-                  }
-                  .link-card h2 {
-                      margin: 10px 0;
-                      font-size: 1.5em;
-                  }
-                  .link-card p {
-                      font-size: 0.9em;
-                      color: #333;
-                  }
-                  .link-card .icon {
-                      font-size: 3em;
-                  }
-                  footer {
-                      margin-top: 60px;
-                      font-size: 0.9em;
-                      color: #999;
-                  }
-                  footer a {
-                      color: #88f;
-                  }
-              </style>
+              <meta http-equiv="refresh" content="0; url=os13k-full/">
           </head>
           <body>
-              <div class="emoji">✌️😄</div>
-              <h1>Welcome to OS13k!</h1>
-              <p class="description">
-                  OS13k is a tiny operating system that fits in a 13 kb zip file.
-                  It includes native support for Shadertoys, Dweets, ZzFX sounds, music, trophies, touch input, and much more.
-              </p>
-              <div class="links">
-                  <a href="os13k-full/" class="link-card">
-                      <div class="icon">🖥️</div>
-                      <h2>Full Version</h2>
-                      <p>Complete OS13k experience with all features, apps, games, dweets, shaders, and more.</p>
-                  </a>
-                  <a href="js13k/" class="link-card">
-                      <div class="icon">🎮</div>
-                      <h2>JS13k Build</h2>
-                      <p>Minified competition version that fits in just 13KB. Pure retro gaming experience!</p>
-                  </a>
-              </div>
-              <footer>
-                  <p>❤️ <a href="https://github.com/ford442/OS13k" target="_blank">GitHub Repository</a> | 
-                  <a href="https://js13kgames.com/entries/os13k" target="_blank">JS13k Entry</a></p>
-              </footer>
+              <p>Redirecting to <a href="os13k-full/">OS13k Full Version</a>...</p>
           </body>
           </html>
           EOF
 
-      - name: Upload artifact
+      # --- PREPARE FILES FOR DEPLOYMENT ---
+
+      # 1. Upload for GitHub Pages (Special Format)
+      - name: Upload artifact for Pages
         uses: actions/upload-pages-artifact@v3
         with:
           path: dist
 
-  deploy:
+      # 2. Upload for FTP (Standard Format) - NEW STEP
+      # We must save the 'dist' folder so the FTP job can see it later
+      - name: Upload artifact for FTP
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist-files
+          path: dist
+
+  # ----------------------------------------------------------------
+  # JOB 2: DEPLOY TO GITHUB PAGES
+  # ----------------------------------------------------------------
+  deploy-gh-pages:
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -197,3 +116,42 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+
+  # ----------------------------------------------------------------
+  # JOB 3: DEPLOY TO FTP (YOUR SERVER) - NEW JOB
+  # ----------------------------------------------------------------
+  deploy-ftp:
+    environment:
+      name: ftp-production
+      url: http://www.test.1ink.us.com/web-mouse/  # <--- Optional: Put your actual URL here
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master'
+    steps:
+      # Download the 'dist' folder we saved in the build step
+      - name: Download built website
+        uses: actions/download-artifact@v4
+        with:
+          name: dist-files
+          path: dist
+
+      # Sync to your FTP server
+      - name: 📂 Sync files to FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.4
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          
+          # Tells the action to upload the contents of the 'dist' folder...
+          local-dir: ./dist/
+          
+          # ...into this specific folder on your server.
+          # Based on your Python script, it looks like your website folders 
+          # are inside a directory named "test.1ink.us".
+          server-dir: test.1ink.us/web-mouse/
+          
+          # CRITICAL: Your Python script uses Port 22 (SSH/SFTP). 
+          # You must set this to 'sftp' or the action will try Port 21 and fail.
+          protocol: sftp
+          port: 22
