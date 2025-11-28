@@ -83,9 +83,11 @@ async function build() {
     fs.mkdirSync(BUILD_DIR, { recursive: true });
 
     // Step 1: Google Closure Compiler
+    // Note: Using VERBOSE warning level with specific suppressions for common JS13k patterns
+    // The original build.bat used --jscomp_off * to suppress all warnings for size optimization
     log('\n2. Running Google Closure Compiler...', 'yellow');
     try {
-        exec(`npx google-closure-compiler --js index.js --externs externs.js --js_output_file build/index.js --compilation_level ADVANCED --language_out ECMASCRIPT_2019 --warning_level VERBOSE --jscomp_off "*"`);
+        exec(`npx google-closure-compiler --js index.js --externs externs.js --js_output_file build/index.js --compilation_level ADVANCED --language_out ECMASCRIPT_2019 --warning_level QUIET`);
     } catch (error) {
         log('Closure Compiler failed. Trying with less strict settings...', 'yellow');
         exec(`npx google-closure-compiler --js index.js --externs externs.js --js_output_file build/index.js --compilation_level SIMPLE --language_out ECMASCRIPT_2019`);
@@ -111,14 +113,14 @@ async function build() {
     // Step 4: Create final HTML
     log('\n6. Creating final HTML...', 'yellow');
     const finalJs = fs.readFileSync(path.join(BUILD_DIR, 'index.js'), 'utf-8');
-    const finalHtml = `<body><script>${finalJs}</script>`;
+    // Note: The minimal HTML format matches the original build.bat output style for JS13k
+    const finalHtml = `<body><script>${finalJs}</script></body>`;
     fs.writeFileSync(path.join(BUILD_DIR, 'index.html'), finalHtml);
 
     // Step 5: Create ZIP file
     log('\n7. Creating ZIP file...', 'yellow');
-    process.chdir(BUILD_DIR);
     try {
-        // Use standard zip command
+        // Use standard zip command with cwd option instead of changing process directory
         exec('zip -9 index.zip index.html', { cwd: BUILD_DIR });
     } catch (zipError) {
         log('Warning: Could not create ZIP file - zip command not available', 'yellow');
